@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Third Voice - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .logo-image {
+            width: 120px;
+            height: auto;
+            max-width: 100%;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #2c5a7a;
+            line-height: 1.1;
+            text-align: left;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-selector {
+            margin-bottom: 25px;
+        }
+
+        .scenario-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .scenario-btn {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .scenario-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .scenario-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .tone-analysis {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .tone-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .rewrites {
+            display: grid;
+            gap: 20px;
+        }
+
+        .rewrite-option {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .rewrite-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .rewrite-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .rewrite-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: auto;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .info-sections {
+            display: grid;
+            gap: 20px;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section h3 {
+            color: #2c5a7a;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .info-section p, .info-section li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .info-section ul {
+            padding-left: 20px;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f4c842 0%, #f4c842 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 0.2em;
+            background-position: 0 88%;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .contact-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .contact-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .logo-image {
+                width: 100px;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
+            
+            .scenario-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .tone-scores {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://your-domain.com/path-to-your-logo.png" alt="The Third Voice Logo" class="logo-image">
+                <div class="logo-text">THE<br>3RD<br>VOICE</div>
+            </div>
+            <div class="subtitle">
+                👋 <strong>What This Is</strong><br>
+                An AI-powered assistant designed to help people rewrite emotionally charged messages before hitting send.
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎛️ Try The Demo</h2>
+            
+            <div class="scenario-selector">
+                <h3>Choose a scenario:</h3>
+                <div class="scenario-buttons">
+                    <button class="scenario-btn active" data-scenario="co-parenting">Co-parenting</button>
+                    <button class="scenario-btn" data-scenario="workplace">Workplace</button>
+                    <button class="scenario-btn" data-scenario="relationship">Relationship</button>
+                    <button class="scenario-btn" data-scenario="custom">Custom</button>
+                </div>
+            </div>
+
+            <div>
+                <h3>Your message:</h3>
+                <textarea 
+                    class="message-input" 
+                    placeholder="Paste or write your message here..."
+                    id="messageInput"
+                ></textarea>
+            </div>
+
+            <button class="analyze-btn" id="analyzeBtn">Analyze & Rewrite</button>
+
+            <div class="results" id="results">
+                <div class="tone-analysis">
+                    <h3>📊 Tone Analysis</h3>
+                    <div class="tone-scores">
+                        <div class="score-item">
+                            <div class="score-value" id="emotionalScore">--</div>
+                            <div class="score-label">Emotional Intensity</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value" id="clarityScore">--</div>
+                            <div class="score-label">Clarity</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value" id="constructiveScore">--</div>
+                            <div class="score-label">Constructiveness</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rewrites">
+                    <h3>✨ AI-Suggested Rewrites</h3>
+                    <div class="rewrite-option" data-style="empathetic">
+                        <div class="rewrite-label">
+                            💙 Empathetic
+                            <button class="copy-btn" onclick="copyRewrite('empathetic')">Copy</button>
+                        </div>
+                        <div class="rewrite-text" id="empathetic-rewrite">Loading...</div>
+                    </div>
+                    <div class="rewrite-option" data-style="constructive">
+                        <div class="rewrite-label">
+                            🔧 Constructive
+                            <button class="copy-btn" onclick="copyRewrite('constructive')">Copy</button>
+                        </div>
+                        <div class="rewrite-text" id="constructive-rewrite">Loading...</div>
+                    </div>
+                    <div class="rewrite-option" data-style="boundary">
+                        <div class="rewrite-label">
+                            🛡️ Boundary-Setting
+                            <button class="copy-btn" onclick="copyRewrite('boundary')">Copy</button>
+                        </div>
+                        <div class="rewrite-text" id="boundary-rewrite">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-sections">
+            <div class="info-section">
+                <h3>💡 Why We Built This</h3>
+                <p>We believe that <span class="highlight">better communication can change everything</span>. But when we're hurt, anxious, or frustrated, our messages often come out wrong — or cause harm.</p>
+                <p>The Third Voice acts as a neutral co-mediator, helping you pause, reflect, and reframe — not to fake your feelings, but to express them more constructively.</p>
+                <p><strong>We've seen it save conversations. We believe it can save relationships.</strong></p>
+            </div>
+
+            <div class="info-section">
+                <h3>🌐 Learn More</h3>
+                <div class="contact-links">
+                    <a href="#" class="contact-link">🔗 www.thethirdvoice.ai</a>
+                    <a href="#" class="contact-link">📫 hello@thethirdvoice.ai</a>
+                    <a href="#" class="contact-link">🤝 collaborate@thethirdvoice.ai</a>
+                </div>
+                <p style="margin-top: 15px; font-size: 14px; color: #666;">🔒 This is a prototype — your messages are not stored or used for model training.</p>
+            </div>
+
+            <div class="info-section">
+                <h3>🤝 Collaborators Welcome</h3>
+                <p>This is just the beginning. We're actively exploring:</p>
+                <ul>
+                    <li>API integrations</li>
+                    <li>Custom model fine-tuning</li>
+                    <li>Multilingual expansion</li>
+                    <li>Research partnerships on AI + mental health</li>
+                </ul>
+                <p>If you're a technologist, founder, therapist, or designer who believes in AI for emotional intelligence — we'd love to connect.</p>
+            </div>
+
+            <div class="info-section">
+                <h3>⚠️ Intellectual Property Notice</h3>
+                <p>This interactive demo is part of the early-stage development of The Third Voice, an AI-assisted communication project founded by Predrag Mirkovic.</p>
+                <p>All concepts, language structures, tone analysis logic, and interaction design presented here are protected under applicable intellectual property laws.</p>
+                <p>Please do not duplicate or redistribute this tool without permission.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScenario = 'co-parenting';
+        
+        // Sample messages for different scenarios
+        const sampleMessages = {
+            'co-parenting': "I can't believe you're doing this again! You promised you'd pick up the kids on time and now they're waiting at school. This is exactly why I can't trust you with anything important.",
+            'workplace': "I'm really frustrated that my ideas were completely ignored in the meeting today. It feels like nobody values my input and I'm tired of being overlooked.",
+            'relationship': "You never listen to me! Every time I try to talk to you about something important, you just scroll through your phone. I'm starting to think you don't care about us anymore.",
+            'custom': ''
+        };
+
+        // Scenario selection
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentScenario = this.dataset.scenario;
+                
+                const messageInput = document.getElementById('messageInput');
+                if (currentScenario !== 'custom') {
+                    messageInput.placeholder = sampleMessages[currentScenario];
+                } else {
+                    messageInput.placeholder = "Write your own message here...";
+                }
+            });
+        });
+
+        // Set initial placeholder
+        document.getElementById('messageInput').placeholder = sampleMessages[currentScenario];
+
+        // Analyze button
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim() || sampleMessages[currentScenario];
+            
+            if (!message) {
+                alert('Please enter a message to analyze.');
+                return;
+            }
+
+            // Show loading state
+            this.disabled = true;
+            this.textContent = 'Analyzing...';
+            
+            // Show results section
+            document.getElementById('results').style.display = 'block';
+            
+            // Simulate analysis
+            setTimeout(() => {
+                analyzeMessage(message);
+                this.disabled = false;
+                this.textContent = 'Analyze & Rewrite';
+                
+                // Scroll to results
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        });
+
+        function analyzeMessage(message) {
+            // Simulate tone analysis scores
+            const emotionalIntensity = Math.floor(Math.random() * 40) + 60; // 60-100
+            const clarity = Math.floor(Math.random() * 30) + 40; // 40-70
+            const constructiveness = Math.floor(Math.random() * 30) + 30; // 30-60
+
+            document.getElementById('emotionalScore').textContent = emotionalIntensity + '%';
+            document.getElementById('clarityScore').textContent = clarity + '%';
+            document.getElementById('constructiveScore').textContent = constructiveness + '%';
+
+            // Generate rewrites based on scenario
+            generateRewrites(message, currentScenario);
+        }
+
+        function generateRewrites(message, scenario) {
+            const rewrites = {
+                'co-parenting': {
+                    empathetic: "I understand things come up, but when pickup times change, it really affects the kids. Could we work on a backup communication plan so they don't have to wait? I'd appreciate your help with this.",
+                    constructive: "I'd like to talk about pickup reliability. When plans change last minute, it creates challenges for everyone. Can we establish a system to communicate changes earlier?",
+                    boundary: "Consistent pickup times are important for the kids' sense of security. I need to know I can count on the schedule we agreed on. Let's discuss how to make this work better."
+                },
+                'workplace': {
+                    empathetic: "I noticed my suggestions weren't addressed in today's meeting. I'm wondering if there's a better way I can contribute to these discussions. Could we chat about how to make sure all voices are heard?",
+                    constructive: "I'd like to follow up on the ideas I shared in today's meeting. I think they could add value to our project. When would be a good time to discuss them further?",
+                    boundary: "I want to ensure my contributions are being considered in team decisions. Could we establish a clearer process for input and feedback during meetings?"
+                },
+                'relationship': {
+                    empathetic: "I've been feeling disconnected lately when I try to share things with you. I value our conversations and would love to find a time when we can really focus on each other. What works for you?",
+                    constructive: "I'd like to have more meaningful conversations together. Could we set aside some phone-free time to really connect? I miss having your
